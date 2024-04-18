@@ -1,42 +1,47 @@
 #!/usr/bin/python3
-"""Module that lists all states from mySQL database"""
 import sys
 import MySQLdb
 
-def list_states (username, password, database):
-    """lists all states from the database hbtn_0e_0_usa.
-    Ags:
-        username: mysql username
-        password: mysql password
-        database: mysql database
-    """
-    # Connect to the MySQL server
-    db = MySQLdb.connect(host='localhost',\
-            port=3306,\
-            user=username,\
-            passwd=password,\
-            db=database)
-    cursor = db.cursor()
+def list_states(username, password, database_name):
+    # Connect to MySQL server
+    try:
+        db = MySQLdb.connect(
+            host='localhost',
+            user=username,
+            passwd=password,
+            db=database_name,
+            port=3306
+        )
+        
+        # Create a cursor object using cursor() method
+        cursor = db.cursor()
+        
+        # SQL query to select all states sorted by states.id
+        sql_query = "SELECT * FROM states ORDER BY id ASC"
+        
+        # Execute SQL query
+        cursor.execute(sql_query)
+        
+        # Fetch all rows
+        states = cursor.fetchall()
+        
+        # Display results
+        for state in states:
+            print(state)
 
-    # Execute the SQL query to fetch all states
-    cursor.execute("SELECT * FROM states ORDER BY id ASC")
+        # Close cursor and database connection
+        cursor.close()
+        db.close()
 
-    # Fetch all the rows from the query result
-    rows = cursor.fetchall()
+    except MySQLdb.Error as e:
+        print("Error connecting to MySQL:", e)
+        sys.exit(1)
 
-    # Print the results
-    for row in rows:
-        print(row)
-
-    # Close the database connection
-    db.close()
-
-# Example usage
-if __name__ == '__main__':
-
-    username = sys.argv[1]
-    password = sys.argv[2]
-    database = sys.argv[3]
-
-    list_states(username, password, database)
+if __name__ == "__main__":
+    if len(sys.argv) != 4:
+        print("Usage: {} <mysql_username> <mysql_password> <database_name>".format(sys.argv[0]))
+        sys.exit(1)
+    
+    username, password, database_name = sys.argv[1], sys.argv[2], sys.argv[3]
+    list_states(username, password, database_name)
 
